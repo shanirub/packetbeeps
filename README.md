@@ -1,8 +1,8 @@
 # packetbeeps
-unnamed project for sniffing traffic and making some art
-a chance to improve my rust, network configuration, sys admin skills....
+- unnamed project for sniffing traffic and making some art
+- a chance to improve my rust, network configuration, sys admin skills....
 
-initial breakdown by chatgpt
+# initial breakdown by chatgpt
 
 ---
 
