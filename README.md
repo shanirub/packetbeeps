@@ -19,8 +19,8 @@
 ---
 
 ### **Detailed Breakdown**
-#### **Mission 1: Packet Sniffer Setup**
-- **Submissions**:
+#### ****Mission 1: Packet Sniffer Setup**
+- **Submissions**:**
   1. Configure your router for port mirroring or packet forwarding to the Pi.
   2. Set up packet capture on the Raspberry Pi.
   3. Parse the captured packets to extract meaningful information (e.g., protocol type, size, or direction).
