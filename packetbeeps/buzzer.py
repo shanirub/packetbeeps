@@ -21,10 +21,11 @@ class Buzzer:
         ]
 
     def play_note(self, note_index):
+        print(f"play_note got called with index {note_index}")
         if 0 <= note_index < len(self.note_frequencies):
             frequency = self.note_frequencies[note_index]
             # Play the note for 0.5 seconds
-            for _ in range(5):
+            for _ in range(frequency):
                 GPIO.output(17, GPIO.HIGH)
                 time.sleep(1 / (2 * frequency))  # Half of the period
                 print(f"BEEP! {frequency}")
