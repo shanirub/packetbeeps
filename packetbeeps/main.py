@@ -1,8 +1,13 @@
 import time
-
+import platform
 from scapy.all import sniff
 
 stop_sniffing = False
+play_buzzer = False
+buzzer = None
+
+def is_raspberry_pi():
+    return platform.system() == 'Linux' and 'raspberrypi' in platform.node().lower()
 
 def stop_filter(packet):
     global stop_sniffing
@@ -33,6 +38,7 @@ def calculate_tone(protocol, sport, dport, packet_size, ttl):
 
 
 def process_packets(packet_batch):
+    global buzzer
     print(f"Processing {len(packet_batch)} packets...")
     for packet in packet_batch:
         # Example: Extract properties and play sound
@@ -45,7 +51,9 @@ def process_packets(packet_batch):
         # Send packet data to sound generator
         tone_index = calculate_tone(protocol, sport, dport, size, ttl)
         print(f"Playing tone index: {tone_index}")
-        # play_sound(tone_index)  # Implement sound generation logic here
+
+        if play_buzzer and buzzer:
+            buzzer.play_note(tone_index)
 
 # Tone mapping logic
 def packet_callback(packet):
@@ -60,7 +68,15 @@ def packet_callback(packet):
 
 def main():
     global stop_sniffing
+    global buzzer
+    global play_buzzer
+    play_buzzer= is_raspberry_pi()
 
+    if play_buzzer:
+        from buzzer import Buzzer
+        buzzer = Buzzer()
+
+    print(f"Running on raspi: {play_buzzer}. buzzer: {buzzer}")
     print("Starting packet sniffing... Ctrl+C to stop")
     try:
         while not stop_sniffing:
@@ -72,7 +88,7 @@ def main():
             else:
                 print("No packets captured in this cycle.")
                 # Add a sleep to allow system to handle interrupt
-            time.sleep(1)
+            time.sleep(2)
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt detected, stopping...")
         stop_sniffing = True
