@@ -2,6 +2,7 @@
 - unnamed project for sniffing traffic and making some art
 - a chance to improve my rust, network configuration, sys admin skills....
 - Hardware used: Raspi3b (2015), passive buzzer  KY-006
+- Current status: works nicely with python
 
 # initial breakdown by chatgpt
 
