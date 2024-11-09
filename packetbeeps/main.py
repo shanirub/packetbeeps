@@ -7,7 +7,12 @@ play_buzzer = False
 buzzer = None
 
 def is_raspberry_pi():
-    return platform.system() == 'Linux' and 'raspberrypi' in platform.node().lower()
+    try:
+        with open('/proc/device-tree/model', 'r') as f:
+            model = f.read()
+            return 'Raspberry Pi' in model
+    except FileNotFoundError:
+        return False
 
 def stop_filter(packet):
     global stop_sniffing
