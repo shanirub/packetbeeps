@@ -1,11 +1,13 @@
 """
 script for generating wav files for music notes.
-those notes will be used in mock
+
+run only once on pc.
+
+maybe i'll use wavs created in the future
 """
 
 import numpy as np
 from scipy.io.wavfile import write
-import os
 
 def generate_tone(frequency, duration, sample_rate=44100, amplitude=32767):
     """Generate a pure tone and save it as a .wav file."""
@@ -29,13 +31,3 @@ for note, freq in notes.items():
     tone = generate_tone(freq, 0.5)  # 2-second duration
     write(f"{note}.wav", 44100, tone)
     print(f"{note}.wav created!")
-
-"""
-loading the files in code:
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-SOUND_DIR = os.path.join(BASE_DIR, 'assets', 'sounds')
-
-c4_file = os.path.join(SOUND_DIR, 'C4.wav')
-print(f"Playing: {c4_file}")
-"""

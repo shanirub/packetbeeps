@@ -2,6 +2,9 @@ import RPi.GPIO as GPIO
 import time
 
 class Buzzer:
+    """
+    object to communicate with buzzer on raspi
+    """
 
     def __init__(self):
         # Set up GPIO mode and pin

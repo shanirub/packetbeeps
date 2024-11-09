@@ -1,6 +1,10 @@
 import RPi.GPIO as GPIO
 import time
 
+"""
+testing script for buzzer. runs only on raspi
+"""
+
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(17, GPIO.OUT)
 

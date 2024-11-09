@@ -1,12 +1,20 @@
 import time
-import platform
 from scapy.all import sniff
 
+# flag for breaking event loop
 stop_sniffing = False
+
+# set to True only on raspi
 play_buzzer = False
+
+# Buzzer object only on raspi
 buzzer = None
 
 def is_raspberry_pi():
+    """
+
+    :return: True if running on raspi, False otherwise
+    """
     try:
         with open('/proc/device-tree/model', 'r') as f:
             model = f.read()
@@ -19,6 +27,15 @@ def stop_filter(packet):
     return stop_sniffing
 
 def calculate_tone(protocol, sport, dport, packet_size, ttl):
+    """
+    decide which tone to play, based on various packet's attributes
+    :param protocol:
+    :param sport: source port
+    :param dport: dest port
+    :param packet_size:
+    :param ttl:
+    :return: int 0-7 for a note
+    """
     # Map protocol to a base note
     protocol_map = {
         "TCP": 0,  # C4
@@ -43,33 +60,29 @@ def calculate_tone(protocol, sport, dport, packet_size, ttl):
 
 
 def process_packets(packet_batch):
+    """
+    process all packets in batch, and calculate tone for each one
+    on raspi a Buzzer() is created to allow actual beeps
+    on pc only prints are shown
+    """
     global buzzer
     print(f"Processing {len(packet_batch)} packets...")
     for packet in packet_batch:
-        # Example: Extract properties and play sound
+        # get used values
         protocol = packet.sprintf("%IP.proto%") if packet.haslayer('IP') else "Unknown"
         sport = getattr(packet, 'sport', 0)
         dport = getattr(packet, 'dport', 0)
         size = len(packet)
         ttl = getattr(packet, 'ttl', 64)
 
-        # Send packet data to sound generator
+        # find tone for values
         tone_index = calculate_tone(protocol, sport, dport, size, ttl)
         print(f"Playing tone index: {tone_index}")
 
         if play_buzzer and buzzer:
+            # only on raspi
             buzzer.play_note(tone_index)
 
-# Tone mapping logic
-def packet_callback(packet):
-    protocol = packet.sprintf("%IP.proto%")  # TCP, UDP, etc.
-    sport = packet.sport if hasattr(packet, "sport") else 0
-    dport = packet.dport if hasattr(packet, "dport") else 0
-    size = len(packet)
-    ttl = packet.ttl if hasattr(packet, "ttl") else 64
-
-    tone_index = calculate_tone(protocol, sport, dport, size, ttl)
-    print(f"Playing tone index: {tone_index}")
 
 def main():
     global stop_sniffing
@@ -78,6 +91,7 @@ def main():
     play_buzzer= is_raspberry_pi()
 
     if play_buzzer:
+        # only on raspi
         from buzzer import Buzzer
         buzzer = Buzzer()
 
@@ -86,62 +100,19 @@ def main():
     try:
         while not stop_sniffing:
             print(f"stop sniffing is {stop_sniffing}")
-            # Sniff 10 packets at a time
             packets = sniff(count=10, timeout=5, stop_filter=stop_filter)  # Timeout ensures it doesn't hang if no packets are captured
             if packets:
                 process_packets(packets)
             else:
                 print("No packets captured in this cycle.")
-                # Add a sleep to allow system to handle interrupt
-            time.sleep(2)
+
+            time.sleep(2) # taking a break from sniffing and allowing interruption
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt detected, stopping...")
         stop_sniffing = True
-
 
     print("Exiting gracefully.")
 
 if __name__ == "__main__":
     main()
 
-
-"""
-parallel option
-
-import threading
-from queue import Queue
-from scapy.all import sniff
-
-def process_packets(packet_queue):
-    while True:
-        packets = packet_queue.get()
-        if packets is None:  # Exit signal
-            break
-        for packet in packets:
-            # Tone processing logic here
-            tone_index = calculate_tone("TCP", 12345, 80, 512, 64)  # Placeholder
-            print(f"Playing tone: {tone_index}")
-            # play_sound(tone_index)
-        packet_queue.task_done()
-
-def main():
-    packet_queue = Queue()
-    processor_thread = threading.Thread(target=process_packets, args=(packet_queue,))
-    processor_thread.start()
-
-    print("Starting packet sniffing...")
-    try:
-        while True:
-            packets = sniff(count=10, timeout=5)
-            if packets:
-                packet_queue.put(packets)
-    except KeyboardInterrupt:
-        print("Stopping...")
-    finally:
-        packet_queue.put(None)  # Signal the processor thread to exit
-        processor_thread.join()
-
-if __name__ == "__main__":
-    main()
-
-"""
