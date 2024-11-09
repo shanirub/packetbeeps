@@ -24,9 +24,10 @@ class Buzzer:
         if 0 <= note_index < len(self.note_frequencies):
             frequency = self.note_frequencies[note_index]
             # Play the note for 0.5 seconds
-            for _ in range(frequency):
+            for _ in range(5):
                 GPIO.output(17, GPIO.HIGH)
                 time.sleep(1 / (2 * frequency))  # Half of the period
+                print(f"BEEP! {frequency}")
                 GPIO.output(17, GPIO.LOW)
                 time.sleep(1 / (2 * frequency))
             time.sleep(0.5)  # Delay between notes
